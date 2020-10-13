@@ -1,0 +1,51 @@
+---
+title: "Writing Functions in R"
+author: "Chris Moroney, Jordan Mielbrecht, Pauline Lee"
+date: "`r Sys.Date()`"
+output: openintro::lab_report
+---
+
+```{r load-packages, message=FALSE}
+library(tidyverse)
+library(openintro)
+```
+
+### Exercise 1
+
+Function written that computes the magnitude, or length, of a vector that is inputted. 
+
+```{r code-chunk-label}
+v1 =c(2, -3, 6)
+v2 =c(-2, 4, 7)
+length3 <- function(v) sqrt(v[1]*v[1]+v[2]*v[2]+v[3]*v[3])
+length3(v1)
+length3(v2)
+```
+
+### Exercise 2
+
+Function written that computes the magnitude of both inputted vectors, as well as the dot and cross products. 
+
+```{r}
+myvectorops <- function(v1, v2){
+  structure(list(v1=v1, v2=v2, 
+                 v1mag = length3(v1), 
+                 v2mag = length3(v2),
+                 dotprod=v1[1]*v2[1]+v1[2]*v2[2]+v1[3]*v2[3], 
+                 crossprod=c(v1[2]*v2[3]-v1[3]*v2[2], v1[3]*v2[1]-v1[1]*v2[3], v1[1]*v2[2]-v1[2]*v2[1])), class="myvectorops")
+}
+print.myvectorops <- function(x, ...){
+  cat("Basic Vector Operations", "\n", "a = <", x$v1[1], ",", x$v1[2], ",", x$v1[3], 
+      ">, b = <", x$v2[1], ",", x$v2[2], ",", x$v2[3], ">,", "\n", 
+      "|a| = ", x$v1mag, ", |b| = ", x$v2mag, ",", "\n",
+      "dot product: a.b = ", x$dotprod, ",",
+      "\n", "cross product: a x b = <", x$crossprod[1], ",", x$crossprod[2], ",", x$crossprod[3],"> ", sep="")
+}
+
+v1 =c(2, -3, 6)
+v2 =c(-2, 4, 7)
+myvectorops(v1, v2)
+```
+
+...
+

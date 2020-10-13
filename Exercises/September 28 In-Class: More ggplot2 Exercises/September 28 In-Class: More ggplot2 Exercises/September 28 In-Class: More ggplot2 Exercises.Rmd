@@ -1,0 +1,57 @@
+---
+title: "September 28 In-Class: More ggplot2 Exercises"
+author: "Chris Moroney, Jordan Mielbrecht, Pauline Lee"
+date: "`r Sys.Date()`"
+output: openintro::lab_report
+---
+
+```{r load-packages, message=FALSE}
+library(tidyverse)
+library(openintro)
+library(mosaic)
+```
+
+### Exercise 3.1
+
+```{r code-chunk-label}
+# Problem 3.1.1
+ggplot(data = Galton, mapping = aes(x = height, y = father)) +
+  geom_jitter(width = .5, height = .5)
+```
+
+```{r}
+# Problem 3.1.2
+ggplot(data = Galton, mapping = aes(x = height, y = father)) +
+  geom_jitter(width = .5, height = .5) + 
+  facet_wrap(~ sex, nrow = 1)
+```
+
+```{r}
+# Problem 3.1.3
+ggplot(data = Galton, mapping = aes(x = height, y = father)) +
+  geom_jitter(width = .5, height = .5, size = 1) + 
+  facet_wrap(~ sex, nrow = 1) + 
+  geom_smooth(mapping = aes(x = height, y = father), method = "lm", se = FALSE)
+```
+
+### Exercise 3.4
+
+```{r}
+# Problem 3.4.1
+ggplot(data = Marriage, mapping = aes(x = age, y = hs, color = race)) +
+  geom_jitter(width = .5, height = .5) +
+  facet_wrap(~ person, nrow = 1) 
+```
+
+Problem 3.4.2)
+We are using the x axis to represent age of each marriage partner and the y axis to represent each person's high school experience. Additionally we separated bride and groom entries into two different graphs using a facet, and we also used color to represent race. We were curious as to the relationship of age and high school experience in a marriage to see if there was any relevance. We also were curious to see how race played a part in marriages in this dataset, such that if race effected high school education or age of marriage at any point. While many of the points were dominantly White, it is interesting to see how the age and high school education has a role in a marriage for a different race, such as Black. Finally, we separated brides and grooms to see if there was a difference in age and high school experience to see if there was any influence for their marriage. 
+
+```{r}
+# Problem 3.4.3
+ggplot(data = Marriage, mapping = aes(x = age, y = hs, color = race, size = sign)) +
+  geom_jitter(width = .5, height = .5) +
+  facet_wrap(~ person, nrow = 1) 
+```
+
+...
+

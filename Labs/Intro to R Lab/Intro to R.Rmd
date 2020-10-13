@@ -1,0 +1,99 @@
+---
+title: "Lab 1: Intro to R"
+author: "Chris Moroney, Jordan Mielbrecht, Pauline Lee"
+date: "`r Sys.Date()`"
+output: openintro::lab_report
+---
+
+```{r load-packages, message=FALSE}
+library(tidyverse)
+library(openintro)
+```
+
+### Exercise 1
+
+```{r view-girls-counts}
+arbuthnot$girls
+```
+
+
+### Exercise 2
+
+In the arbuthnot data set, there does seem to be an apparent trend in the data for girls baptized overtime. In general, as time progresses by year, the number of girls baptized appears to increase. Although between 1640 and 1660 the number of girls baptized decreases significantly, the rest of the data shows that the data generally increases over time.
+
+```{r trend-girls}
+# plots the "girls" variable against the year as a line graph
+ggplot(data = arbuthnot, aes(x = year, y = girls)) + 
+  geom_line()
+```
+
+
+### Exercise 3
+
+The line graph produced from the newly created "boy_prop" variable shows a consistent trend of data with little variance. Although the pattern of the graph shows many spikes, all of the data is very close to 0.52, which shows there is very little variance in the data for every year. This means that for every year in the data set, the proportion of boys baptized compared to the total population is most likely between 0.51 and 0.53.
+
+```{r plot-prop-boys-arbuthnot}
+# Calculates total baptisms and adds variable to the dat aset
+arbuthnot <- arbuthnot %>% 
+  mutate(total = boys + girls)
+# Calculates proportion of boys baptized compared to the population, then adds to the data set
+arbuthnot <- arbuthnot %>% 
+  mutate(boy_prop = boys / total)
+# plots boy_prop
+ggplot(data = arbuthnot, aes(x = year, y = boy_prop)) +
+  geom_line()
+```
+
+
+### Exercise 4
+
+In the data set, "present", we see that the years included to this data set is every year from 1940 to 2002. We were able to see this by using the command present$year, which shows all of the entries in the years column. The dimensions of the data set is 63 rows and 3 columns, and we were able to figure this out by using the command glimpse(present). The variable common names are "year", "boys", and "girls" which also come from the glimpse(present) command. 
+
+```{r dim-present}
+# Shows the dimensions of the data set and all variable names
+glimpse(present)
+# Shows all of the years in the data set
+present$year
+```
+
+
+### Exercise 5
+
+The counts of the present data set differ from the Arbuthnot data set in that the counts in the present data set contain counts for boys and girls that are substantially larger than that of the Arbuthnot data set. On top of this, the two data sets contain a different time period, in which Arbuthnot takes place between year 1629 and 1710, while present takes place between year 1940 and 2002.
+
+```{r count-compare}
+# Shows a preview of the arbuthnot data set
+glimpse(arbuthnot)
+# Shows a preview of the present data set
+glimpse(present)
+```
+
+
+### Exercise 6
+
+We can see that in a plot of boys born over time in the present data set, the proportion of boys born decreases slightly over time. There is an apparent downwards trend starting from 1940 to 1960, and then again after 1980 to 2000. Despite a small trend increase between 1960 to 1980, the general shape of the graph shows a decrease in births for boys proportionate to girls. This tells us that Arbuthnot's observation of boys being born in greater proportion over time does not hold up in the U.S. because the downward trend found in the graph shows boys decreasing in proportion over time.
+
+```{r plot-prop-boys-present}
+# Calculates total births between boys and girls and adds variable to the data set
+present <- present %>% 
+  mutate(total = boys + girls)
+# Calculates proportion of boys baptized compared to the population, then adds to the data set
+present <- present %>% 
+  mutate(boy_prop = boys / total)
+# plots boy_prop
+ggplot(data = present, aes(x = year, y = boy_prop)) +
+  geom_line()
+```
+
+
+### Exercise 7
+
+In the present data set, we see that between 1940 and 2002, the year of 1961 contains the most births in the U.S.
+
+```{r find-max-total}
+present <- present %>% 
+  mutate(total = boys + girls)
+present %>%
+  arrange(desc(total))
+```
+

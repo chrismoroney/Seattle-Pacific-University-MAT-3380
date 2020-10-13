@@ -1,0 +1,116 @@
+---
+title: "Baby Names Graph"
+author: "Chris Moroney"
+date: "`r Sys.Date()`"
+output: openintro::lab_report
+---
+
+```{r load-packages, message=FALSE}
+library(mdsr)
+library(tidyverse)
+library(babynames)
+library(Hmisc)
+```
+
+
+### Original code from MDSR
+
+```{r}
+BabynamesDist <- make_babynames_dist()
+head(BabynamesDist, 2) 
+
+BabynamesDist %>% filter(name == "Benjamin") 
+
+Joseph <- BabynamesDist %>%  
+  filter(name == "Joseph" & sex == "M")  
+name_plot <- ggplot(data = Joseph, aes(x = year)) 
+
+name_plot <- name_plot +  
+  geom_bar(stat = "identity", aes(y = count_thousands * alive_prob),  
+           fill = "#b2d7e9", colour = "white") 
+
+name_plot <- name_plot + geom_line(aes(y = count_thousands), size = 2) 
+
+name_plot <- name_plot +  
+  ylab("Number of People (thousands)") + xlab(NULL) 
+
+summary(name_plot) 
+
+wtd.quantile <- Hmisc::wtd.quantile  
+median_yob <-  
+  with(Joseph, wtd.quantile(year, est_alive_today, probs = 0.5)) 
+median_yob 
+
+name_plot <- name_plot +
+  geom_bar(stat = "identity", colour = "white", fill = "#008fd5",
+           aes(y = ifelse(year == median_yob, est_alive_today/ 1000, 0))) 
+
+name_plot +  
+  ggtitle("Age Distribution of American Boys Named Joseph") +  
+  geom_text(x = 1935, y = 40, label = "Number of Josephs\nborn each year") + 
+  
+  geom_text(x = 1915, y = 13, label = 
+              "Number of Josephs\nborn each year\nestimated to be alive\non 1/1/2014",  
+            colour = "#b2d7e9") +  
+  geom_text(x = 2003, y = 40,  
+            label = "The median\nliving Joseph\nis 49 years old",  colour = "darkgray") + 
+  geom_curve(x = 1995, xend = 1974, y = 40, yend = 24,  
+             arrow = arrow(length = unit(0.3,"cm")), curvature = 0.5) + ylim(0, 42) 
+```
+
+### Reproduced Code with "Chris" instead of Joseph and Code from book
+
+Here is all of the code and modified for my name, which is Chris
+
+```{r code-chunk-label}
+BabynamesDist <- make_babynames_dist()
+head(BabynamesDist, 2) 
+
+BabynamesDist %>% filter(name == "Chris") 
+
+Chris <- BabynamesDist %>%  
+  filter(name == "Chris" & sex == "M")  
+name_plot <- ggplot(data = Chris, aes(x = year)) 
+
+name_plot <- name_plot +  
+  geom_bar(stat = "identity", aes(y = count_thousands * alive_prob),  
+           fill = "#b2d7e9", colour = "white") 
+
+name_plot <- name_plot + geom_line(aes(y = count_thousands), size = 2) 
+
+name_plot <- name_plot +  
+  ylab("Number of People (thousands)") + xlab(NULL) 
+
+summary(name_plot) 
+
+wtd.quantile <- Hmisc::wtd.quantile  
+median_yob <-  
+  with(Chris, wtd.quantile(year, est_alive_today, probs = 0.5)) 
+median_yob 
+
+name_plot <- name_plot +
+  geom_bar(stat = "identity", colour = "white", fill = "#008fd5",
+           aes(y = ifelse(year == median_yob, est_alive_today/ 1000, 0))) 
+
+name_plot +  
+  ggtitle("Age Distribution of American Boys Named Chris") +  
+  geom_text(x = 1935, y = 8, label = "Number of Chris's\nborn each year") + 
+  
+  geom_text(x = 1920, y = 2.5, label = 
+              "Number of Chris's\nborn each year\nestimated to be alive\non 1/1/2014",  
+            colour = "#b2d7e9") +  
+  geom_text(x = 1993, y = 7.5,  
+            label = "The median\nliving Chris\nis 49 years old",  colour = "darkgray") + 
+  geom_curve(x = 1985, xend = 1965, y = 7.5, yend = 5.75,  
+             arrow = arrow(length = unit(0.3,"cm")), curvature = 0.5) + ylim(0, 10) 
+```
+
+
+### List of Graph changes
+
+- Replaced all instances of “Joseph” with “Chris” or “Chris’s”
+- Changed the Label location of "number of Chris's\nborn each year" to x=1935, y=8
+- Changed the Label location of "Number of Chris's\nborn each year\nestimated to be alive\non 1/1/2014" to x = 1920, y = 2.5
+- Changed the Label location of The median\nliving Chris\nis 49 years old" to x=1993, y=7.5
+- Changed the arrow coordinates to be x=1985, xend=1965, y=7.5, yend=5.75, 
+- Changed the scale of the y-axis to limit from 40 thousand to 10 thousand, which became ylim(0, 10)

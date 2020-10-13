@@ -1,0 +1,64 @@
+---
+title: "October 12 In-Class: Data Wrangling"
+author: "Chris Moroney, Jordan Mielbrecht, Pauline Lee"
+date: "`r Sys.Date()`"
+output: openintro::lab_report
+---
+
+```{r load-packages, message=FALSE}
+library(tidyverse)
+library(openintro)
+library(mdsr)
+library(babynames)
+babynames <- make_babynames_dist()
+```
+
+### Exercise 1 Data Wrangling Sheet
+
+
+```{r code-chunk-label}
+findbabyname <- function(babyname){
+  babynames %>%
+    filter(name==babyname) %>%
+    group_by(year) %>%
+    summarize(total_n =sum(n)) %>%
+    arrange(desc(total_n)) %>%
+    head(5)
+}
+
+findbabyname("Brian")
+```
+
+### Exercise 2
+
+
+```{r}
+deadfemales <- babynames %>%
+  filter(sex=="F") %>%
+  group_by(name) %>%
+  summarize(dead_prob = 1-(sum(est_alive_today) / sum(n)), total_n = sum(n)) %>%
+  filter(total_n > 50000) %>%
+  arrange(desc(dead_prob)) %>%
+  head(10)
+
+deadfemales
+
+deadmales <- babynames %>%
+  filter(sex=="M") %>%
+  group_by(name) %>%
+  summarize(dead_prob = 1-(sum(est_alive_today) / sum(n)), total_n = sum(n)) %>%
+  filter(total_n > 50000) %>%
+  arrange(desc(dead_prob)) %>%
+  head(10)
+
+deadmales
+```
+
+### Exercise 4.8 
+
+
+### Exercise 4.9
+
+
+### Exercise 4.10
+

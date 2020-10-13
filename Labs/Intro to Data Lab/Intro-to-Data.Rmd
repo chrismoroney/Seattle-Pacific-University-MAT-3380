@@ -1,0 +1,157 @@
+---
+title: "Lab: Introduction to Data"
+author: "Chris Moroney, Jordan Mielbrecht, Pauline Lee"
+date: "`r Sys.Date()`"
+output: openintro::lab_report
+---
+
+```{r load-packages, message=FALSE}
+library(tidyverse)
+library(openintro)
+```
+
+### Exercise 1
+
+All three histograms all look very similar to one another, in which at approximately 0 for dep_delay, there is a large spike that quickly decreases as dep_delay increases. The only minor difference is that as each binwidth increases, the width of each bar on the histogram also increases. 
+
+```{r code-chunk-label}
+ggplot(data = nycflights, aes(x = dep_delay)) +
+  geom_histogram()
+ggplot(data = nycflights, aes(x = dep_delay)) +
+  geom_histogram(binwidth = 15)
+ggplot(data = nycflights, aes(x = dep_delay)) +
+  geom_histogram(binwidth = 150)
+```
+
+### Exercise 2
+
+There are 68 flights that are heading to SFO in February.
+
+```{r}
+sfo_feb_flights <- nycflights %>%
+  filter(dest == "SFO", month == 2)
+```
+
+### Exercise 3
+
+The majority of flights that are heading to SFO that are in February show a majority of fights that arrive slightly early. Using the median of the data, we can see that the average flight arrives approximately 11 minutes early (median = -11. We can also see that the interquartlie range, or IQR, is 23.25 (IQR = 23.25). This means that between the earliest 25% of arriving flights to SFO in February and the latest 25%, we can see that there is a range of 23.25 minutes. This shows that the majority of flights would arrive somewhere in between before their expected arrival by about 22 minutes (-11 - (23.25 / 2), or slightly later by no longer than 5 minutes (-11 + (23.25 / 2)).
+
+```{r}
+# Plots the histogram of arrival delay for flights headed to SFO in February
+ggplot(data = sfo_feb_flights, aes(x = arr_delay)) + 
+  geom_histogram()
+# Shows the median of arrival delays for flights headed to SFO in February
+median(sfo_feb_flights$arr_delay)
+# Shows the IQR of arrival delays for flights headed to SFO in February
+IQR(sfo_feb_flights$arr_delay)
+```
+
+### Exercise 4
+
+The carriers with the most variable arrival delays are DL and UA. Both of these carriers have an IQR of 22 minutes, which means that the middle 50 % of these flights (in between the shortest arrival delay, or bottom 25%, and longest arrival delay, or top 25%) have a range of 22 minutes or when they are expected to arrive.   
+
+```{r}
+# Go through all of sfo_feb_flights
+sfo_feb_flights %>%
+  # Grouping by flight carrier
+  group_by(carrier) %>%
+  # Finding the median, IQR, and also number of flights
+  summarise(median_ad = median(arr_delay), iqr_ad = IQR(arr_delay), n_flights = n())
+```
+
+### Exercise 5
+
+Using the mean and median have different pros and cons. Some pros for using the mean is that one can find the average of an entire data set while taking all values into account. This means that we may find a more accurate average across our data set because we are focusing on the data points themselves and their values. The cons to using the mean include the fact that outliers really skew the mean. This means that if we have several outliers in our data, our average can become farily off center, and may not truly reflect what is happening in the data. On the other hand, an advantage for using the median is that outliers will not effect the median, or middle value. Using the median would simply check which value in the data set is the "middle-most" value. With that being said, the disadvantage of the median is that we would not be calculating a very accurate average, but rather find the middle-most value in our data set to call as the "centered" value. I believe that picking the mean for departure delays by month is better than the median because the mean will take into account all flights and their time value. The median would just show which time is "the middle" value for time delayed, whereas the mean will provide an average of all times and how early or late the delay is. 
+
+```{r}
+# Going through all nycflights
+nycflights %>%
+  # Grouping by month
+  group_by(month) %>%
+  # Shows mean and median for each month
+  summarise(mean_dd = mean(dep_delay)) %>%
+  # Sorts by mean
+  arrange(desc(mean_dd))
+
+# Going through all nycflights
+nycflights %>%
+  # Grouping by month
+  group_by(month) %>%
+  # Shows mean and median for each month
+  summarise(median_dd = median(dep_delay)) %>%
+  # Sorts by median
+  arrange(desc(median_dd))
+```
+
+### Exercise 6
+
+If I was selecting an airport simply based on time departure percentage, I would choose LGA because they have the highest on time departure percentage. I chose 20 minutes as the time for distinguishing between "on time" and "delayed". Given that at this time, LGA has the highest on time departure percentage compared to JFK and EWR, I would choose LGA. However, realistically, I would also want to take a look at the total number of flights that each airport sends. For instance, if LGA sends 83% of 100 flights, that means only 83 flights were sent on time. If another airport also sent 83% on time, but sent 10000 total flights, I would feel much more comfortable using that other airport. Since we are just using on time departure percentage, however, I would choose LGA. 
+
+```{r}
+# Create a new data frame in nycflights
+nycflights <- nycflights %>%
+  # Creates dep_type, which is distinguished as on time if the delay is less than 20 minutes, else it is delayed
+  mutate(dep_type = ifelse(dep_delay < 20, "on time", "delayed"))
+
+# Go through all of nycflights
+nycflights %>%
+  # Group by original airport
+  group_by(origin) %>%
+  # Summarize by labeling all of the flights on time divided by total flights as the percentage of on time departure rate. 
+  summarise(ot_dep_rate = sum(dep_type == "on time") / n(), n_flights = n()) %>%
+  # Sort by highest percentage first
+  arrange(desc(ot_dep_rate))
+# Visual plot of on time and delayed flights
+ggplot(data = nycflights, aes(x = origin, fill = dep_type)) +
+  geom_bar()
+```
+
+### Exercise 7
+
+Created a new variable that calculates the average speed of each flight.
+
+```{r}
+# create a new data frame inside of nycflights
+nycflights <- nycflights %>%
+  # new column mutated, defining avg_speed. Air_time is divided by 60 because air_time is in minutes.
+  mutate(avg_speed = distance / (air_time / 60))
+```
+
+### Exercise 8
+
+The general trend that I see is that as the distance increases from 0 to 100 miles, the avg_speed increases from around 50 to 400 miles per hour. After about 500 miles, there seems to be a trend where the average speed remains relatively stable, such that the average speed is approximately 400 miles per hour, but almost entirely ranges between 300 and 500 miles per hour. 
+
+```{r}
+# plot the data where x is distance, and y is avg_speed
+ggplot(data = nycflights, aes(x=distance, y=avg_speed)) + 
+  geom_point()
+```
+
+### Exercise 9
+
+Part 1: Plotted
+
+Part 2: The general cutoff point for each airline to arrive on time is around 30 to 40 minutes. Flights that have a dep_delay of greater than 40 minutes are much more likely to arrive late, or have arr_delay > 0. We can also see that much fewer points are at or below the arr_delay line when the dep_delay is greater than 40. Thus, we believe the cutoff is around 30-40 minutes for the dep_delay.
+
+```{r}
+# PART 1
+# new data frame from nycflights
+desired_airlines <- nycflights %>%
+  # filter out all flights to keep just AA, DL, and UA
+  filter(carrier == "AA" | carrier == "DL" | carrier == "UA")
+# Plot the data from the new data frame, with carrier distinguishing color
+ggplot(data = desired_airlines, aes(x=dep_delay, y=arr_delay, colour=carrier)) +
+  # plot data
+  geom_point()
+
+# PART 2
+# new data fram from the airline groups that we already have
+on_time_flights <- desired_airlines %>%
+  # filter out any points that have arr_delay of greater than 0
+  filter(arr_delay <= 0)
+# Plot the data from the new data frame, with carrier distinguishing color
+ggplot(data = on_time_flights, aes(x=dep_delay, y=arr_delay, colour=carrier)) +
+  # plot data
+  geom_point()
+```
+

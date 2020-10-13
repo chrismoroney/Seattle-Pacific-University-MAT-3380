@@ -1,0 +1,120 @@
+---
+title: "Data Visualization and Writing Functions Homework"
+author: "Chris Moroney"
+date: "`r Sys.Date()`"
+output: openintro::lab_report
+---
+
+```{r load-packages, message=FALSE}
+library(tidyverse)
+library(openintro)
+library(mdsr)
+library(readr)
+USStates <- read_csv("USStates.csv")
+```
+
+### Exercise 1
+
+The following graph shows the relationship between each MLB team's win percentage and their payroll in hundreds of millions of dollars by year between 2008 and 2014. For each year, we can see in general, according to the loess curve line, there is a very small increase in win percentage as the payroll for each team increases. However, we can see very clearly that not many teams follow the loess curve very closely. There are several teams that have a higher win percentage than what the loess curve shows at that payroll price, while we also see teams that have a much lower win percentage than what the loess line suggests. Additionally, we can see that there are several teams every year that have a lower payroll with a high win percentage. However, we can see that according to the loess curve, there is a very slight increase in win percentage as teams increase their payroll. This suggests that there is a very small chance that a team may win more games if they pay their players more money. 
+
+```{r code-chunk-label}
+ggplot(data=MLB_teams, mapping=aes(x=payroll / (10^8), y=WPct)) +
+  labs(title = "Relationship between each MLB Team's Win 
+       Percentage and Payroll between 2008 and 2014") +
+  labs(x = "Payroll ($ Hundred Millions)") +
+  labs(y = "Win Percentage") +
+  geom_point() +
+  facet_wrap(~ yearID, ncol = 2) +
+  geom_smooth(se=FALSE)
+```
+
+### Exercise 2
+
+Based off of the patterns in the graph, I can see that in the American League, teams that had a higher Area Population also had a higher Fan Attendance. Additionally, there was a higher payroll for teams with both a higher Area Population and Fan Attendance. Similarly, teams that had a smaller area population also had less fans attending the games. These teams in the American league also did not have as high of a payroll, and a decent number of these teams actually had a lower win percentage as well. In the National League, teams with a higher Fan Attendance generally had a little higher of a Win Percentage compared to teams that had a lower fan attendance. Additionally, the teams with a slightly higher fan attendance generally had a higher payroll. This is similar to the American League, but the Area Population is not as strongly related. The area population seems randomly distributed with no apparent pattern to be seen. 
+
+```{r}
+ggplot(data=MLB_teams, mapping=aes(x=payroll / 10^8, y=WPct, 
+       color=attendance / 10^6, size=metroPop / 10^7)) +
+  labs(title = "Relationship between MLB Team's Win Percentage and Payroll with 
+       consideration of Fan Attendance and Area Population") +
+  labs(x = "Payroll ($ Hundred Millions)") +
+  labs(y = "Win Percentage") +
+  labs(color = "Fan Attendance (Millions)") + 
+  labs(size = "Area Population (Tens of Millions)") +
+  facet_wrap(~ lgID) +
+  geom_point(alpha = 0.5)
+```
+
+### Exercise 3
+
+```{r}
+mystats <- function(stats){
+  structure(list(name = deparse(substitute(stats)), 
+        mean = mean(stats), sd = sd(stats), min = min(stats), 
+        Q1 = quantile(stats, 0.25), median = median(stats), Q3 = quantile(stats, 0.75), 
+        max = max(stats)), class="mystats")
+}
+
+print.mystats <- function(x, ...){
+    cat("Summary Statistics for ", x$name, ":", "\n", 
+        "mean = ", x$mean, ", sd = ", x$sd, "\n", 
+        "Five number summary:", "\n", 
+        "min = ", x$min, ", Q1 = ", x$Q1, ", median = ", x$median, ", Q3 = ", x$Q3, 
+        ", max = ", x$max, sep="")
+}
+
+mystats(MLB_teams$payroll)
+```
+
+### Exercise 4
+
+```{r}
+# First Graph
+ggplot(data = USStates) + 
+  labs(title = "College Education Rates in the U.S.") + 
+  labs(x = "Percent of Adults with College Degrees") +
+  labs(y = "Number of States") +
+  geom_histogram(mapping=aes(x=College),alpha=0.3,color="black", bins=11)+
+  scale_y_continuous(breaks=c(2, 4, 6, 8, 10, 12))
+
+# Second Graph
+ggplot(data = USStates) + 
+  labs(title = "College Education Rates in the U.S.") + 
+  labs(x = "Percent of Adults with College Degrees") +
+  labs(y = "Number of States") +
+  geom_histogram(mapping=aes(x=College),alpha=0.3,color="black", bins=11) +
+  facet_wrap(~ Region, ncol =2) +
+  scale_y_continuous(breaks=c(2, 4, 6, 8, 10, 12))
+
+# Third Graph
+ggplot(data = USStates) +
+  labs(title = "College Education Rates in the U.S. by Region") +
+  labs(x = "Percent of Adults with College Degrees") +
+  labs(y = "Region") +
+  geom_boxplot(mapping = aes(x = College, y = Region)) +
+  scale_x_continuous(breaks=c(20, 30, 40, 50))
+```
+
+For these graphs, I couldn't figure out how to:
+
+- Change the definition of bins in order to manipulate the data to fit properly. Could only change the width of the bins as well as the number of bins, but bin definition?
+- I could not figure out how to change the order of classes. For instance in the third 
+graph, I couldn't figure out how to rearrange the graphs to have "NE" first and "W" last.
+- I couldn't figure out entirely why the axis weren't including all the numbers I desired by tick. I saw in the first two plots, I was being given the y-axis from 2 to 12, but the last plot, I couldn't get the x-axis to go from 20 to 50. 
+
+I prefer the third graph for determining College Degree Percentage by Region. I feel like the box plot allows me to see easier a particular average for each region. We could only tell approximately by groups of how many states in each region had a particular average, but in the box plot, we can tell the college degree graduation by region, which I think is the most beneficial when considering region. 
+
+### Exercise 5
+
+The geoms used in this graph are a boxplot and points. The aesthetics represented in this graph is x and y position, as well as color. The x position of a point represents the percentage of adults with a college degree for a state, and the y position represents what region a particular state (or point) is located. Points themselves represents states in the United States. We can see from the ideal graph (in the assignment) that in general, the Northeast region has the highest percentage of adults with a college degree with a median around 37%, while the south has the lowest percentage with a median around 27%. The Midwest and West region are relatively similar in their median, with the Midwest region having a slightly higher median percentage at 32%. We can also see that in general, states that voted for Clinton as the 2016 winner usually had a higher percentage of college degrees. This is most evident in the Midwest and South regions. We can see that the all of the states in these two regions that had Trump as the election winner had a lower percentage of college degrees than the state or states that voted for Clinton. The only exception to the rule of states having higher percent of degrees for voting for Clinton is the two states that voted for Clinton in the West. Both of those states had lowest college degrees amongst all states in the West region, yet they still voted majority for Clinton. I believe that based off of the data, these two states are New Mexico and Nevada. While two states in the Northeast also follow a similar pattern as the West, I wouldn't really consier this an exception because almost every single state in the Northeast voted for Clinton. Overall, we can see that in general, states in particular regions that had higher college degrees usually voted for Clinton.
+
+```{r}
+# Attempt at extra, don't understand why my boxplot doesn't work, is WRONG
+ggplot(data = USStates, mapping = aes(x = College, y = Region)) +
+  labs(title = "College Education Rates in the U.S. by Region") +
+  labs(x = "Percent of Adults with College Degrees") +
+  labs(y = "Region") +
+  geom_boxplot() +
+  geom_dotplot(mapping=aes(fill=Winner2016), binaxis="y", stackdir="up", binpositions="all")
+```
+

@@ -1,0 +1,93 @@
+---
+title: "September 23 In-Class: ggplot2 Exercises"
+author: "Chris Moroney, Jordan Mielbrecht, Pauline Lee"
+date: "`r Sys.Date()`"
+output: openintro::lab_report
+---
+
+```{r load-packages, message=FALSE}
+library(tidyverse)
+library(openintro)
+library(readr)
+USStates <- read_csv("USStates.csv")
+```
+
+### Section 3.2.4 of R4DS Exercise 4
+
+Here is a scatterplot of highway mileage vs cylinder count for a database of cars
+
+```{r code-chunk-label}
+ggplot(data = mpg, mapping = aes(x = cyl, y = hwy)) +
+  geom_point()
+```
+
+### Section 3.2.4 of R4DS Exercise 5
+
+If we try to plot class vs. cyl as a scatterplot, we will get the following scatterplot. This is not very helpful for us because class is not a continuous variable, which means that we will get points that appear in a manner that would be appropriate for a histogram, but hard to interpret for a scatterplot. We can see that we have points in multiple columns for the classes, which shows that there is an appearance of a number of cylinders for each class. However, this does not become very helpful for us if we want to see the number of average cyliners for each class, for instance. 
+
+
+```{r}
+ggplot(data = mpg, mapping = aes(x = drv, y = class)) +
+  geom_point()
+```
+
+### Section 3.3.1 of R4DS Exercise 1
+
+The points don't become blue because the original commands are saying to map each point's "color variable" as blue, rather than setting the points themselves to blue. Since the original code puts color = "blue" into the mapping and aes(), we are setting a property of each point to blue, rather than the color of the points themselves. Instead, we have to set the color of the plotted point to blue, rather than the data point's "color" value. 
+
+```{r}
+# NON BLUE POINTS
+ggplot(data = mpg) + 
+  geom_point(mapping = aes(x = displ, y = hwy, color = "blue"))
+# BLUE POINTS
+ggplot(data = mpg) +
+  geom_point(mapping = aes(x = displ, y = hwy), color = "blue")
+```
+
+### Section 3.6.1 of R4DS Exercise 6
+
+All graphs plotted below:
+
+```{r}
+# Graph 1
+ggplot(data = mpg, mapping = aes(x = displ, y = hwy)) +
+  geom_point() +
+  geom_smooth(se = FALSE)
+
+# Graph 2
+ggplot(data = mpg, mapping = aes(x = displ, y = hwy, group = drv)) + 
+  geom_point() +
+  geom_smooth(se = FALSE)
+
+# Graph 3
+ggplot(data = mpg, mapping = aes(x = displ, y = hwy)) +
+  geom_point(mapping = aes(color = drv)) +
+  geom_smooth(se = FALSE)
+
+# Graph 4
+ggplot(data = mpg, mapping = aes(x = displ, y = hwy)) +
+  geom_point(mapping = aes(color = drv)) +
+  geom_smooth(se = FALSE)
+
+# Graph 5
+ggplot(data = mpg, mapping = aes(x = displ, y = hwy)) +
+  geom_point(mapping = aes(color = drv)) +
+  geom_smooth(mapping = aes(linetype = drv), se = FALSE)
+
+# Graph 6
+ggplot(data = mpg, mapping = aes(x = displ, y = hwy, fill = drv)) +
+  geom_point(shape = 21, colour = "white", size = 4, stroke = 3)
+```
+
+### USStates In-Class Graph
+
+```{r}
+ggplot(data = USStates, mapping = aes(x = College, y = HouseholdIncome)) + 
+  labs(x = "College Graduation %", y = "Household Income (Thousand $)") + 
+  labs(color = "Region (USA)") + 
+  labs(size = "Population (mil)") +
+  labs(title = "Household Income in Relation to the % of College Graduates for all 50 states") +
+  geom_point(mapping = aes(color = Region, size = Population)) +
+  geom_smooth(method = "lm", linetype = "dashed", se = FALSE, color = "black")
+```
+

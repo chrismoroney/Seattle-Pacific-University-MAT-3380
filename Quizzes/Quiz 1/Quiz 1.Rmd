@@ -1,0 +1,48 @@
+---
+title: "Quiz 1"
+author: "Chris Moroney"
+date: "`r Sys.Date()`"
+output: openintro::lab_report
+---
+
+```{r load-packages, message=FALSE}
+library(tidyverse)
+library(openintro)
+library(readr)
+world2014 <- read_csv("world2014.csv")
+world_by_region <- read_csv("world_by_region.csv")
+```
+
+### Question 1
+
+One of the relationships that the graph shows is that in general, a country with a higher GDP per Capita is expected to have a much higher life expectancy until around 1000 for its local currency, then life expectancy decreases slightly. However, the general relationship between GDP per capita and life expectancy is that the higher the GDP, the longer life expectancy in general. Additionally, there is a relationship between Regions and life expectancy in that the Sub-Saharan African region has a much lower life expectancy than the likes of countries in Latin America, Europe and Central Asia, and North America. For Sub-Saharan Africa, they in particular have a very low GDP per capita, which makes me believe that they would also have a very low life expectancy. However, other regions contain countries that have about the same GDP, but live much longer. Therefore, there may be more external factors that causes a shorter life expectancy for nations in Sub-Saharan Africa, rather than life expectancy being dependent on GDP.  
+
+```{r code-chunk-label}
+ggplot(data = world2014, mapping = aes(x=gdp_percap / 1000, y=life_expect)) + 
+  labs(title = "The Relationship between Life Expectancy and GDP per Capita for
+       Countries by Continental Region")+
+  labs(x = "GDP per Capita (thousands, local currency)") +
+  labs(y = "Life Expectancy (years)") +
+  labs(color = "Continental Region") +
+  geom_point(mapping=aes(color=region)) +
+  geom_smooth(se = FALSE)
+```
+
+### Question 2
+
+```{r}
+ggplot(data = world_by_region, mapping = aes(x = Year, y = ave_lifeexp, color = Region)) +
+  labs(title = "Regional Trends in Life Expectancy Around the World") +
+  labs(x = "Year") +
+  labs(y = "Average Life Expectancy (Years)") +
+  labs(color = "Region") +
+  geom_smooth(method = "loess", se = FALSE, span = 0.2)
+```
+
+### Question 3
+
+The only geom used in this graph is points. The aesthetics used in this graph are x- position to represent "overall cost burden rate", y-position to represent "# of cost-burdened households", and color, which is not entirely clear what it represents, but I believe it also represents the overall cost burden rate. The coordinate system used in this graph is a Cartesian system because there is an identifiable x and y coordinate system. The scales used in this graph are a continuous percentage (x-axis) and continuous logarithmic (y-axis). The x-axis is a continuous percentage because the percentages represented are rates instead of raw values for each city, which means that the raw values were converted to an overall percentage to be plotted. Since each percentage is provided linearly, the scale is a continous percentage. The y-axis is a continuous logarithmic scale because as the scale increases, the distribution increases by a factor of 10. For instance, instead of increasing linearly, the graph increases in this pattern: 1000, 2000, 5000, 10000, 20000, 50000 etc. This is not a linear pattern, which means the scale must be continuous logarithmic. 
+
+The information that the graph provides is the number of households that are considered "household burdened" compared to each city's overall cost burden rate. A burdened household means that one has to pay rent that is a significant percentage of their income. For instance, in the case of San Francisco, the overall burden rate is about 45-46%, which means that a burdened household is a household that needs to pay 45-46% or more of their income in rent. We would expect to see that in general, as the cost burden rate increases, the number of cost-burdened households should also. This is because the burden rate determines how much money that one person spends on housing alone, and if that rate is higher, then we should see that the number of households that are "burdened" should also increase. The overall story that the graph is telling is that housing in many of these cities is just too expensive to afford. The background of this story was saying how rent has become so expensive, and that is causes more and more states to become "burden states" which mean that it becomes harder to live in a state that costs a lot of rent. Thus, the graph's purpose is to show many different cities and the relationship between the overall burden rate, and how many households in that city are paying the burden rate in housing. This is in order to explain to readers that housing has become very expensive in many of these cities. 
+
+I believe that the graph overall is a very good visual to show a relationship in burden rate and number of burdened households. However, personally, it definitely took me a while to understand the context of the graph. I did not understand what "overall" cost burden rate meant. I don't know if this referred to the median value, mean value, or even a completely different value to represent a percentage of burden rates. I took my best guess and simply said that it was the average burden rate for households in each city. I feel like this type of label was a little misleading though. I also did not understand the purpose of the color at first. I thought this was another variable that was being introduced, but after taking in more context of the graph, I realized that color represented the overall cost burden rate. The coloring didn't make much sense to me however, because a city like Ocean City, NJ was very dark, while a city like New York was lighter. I can understand if both burden rate and number of households cause a very dark color, but I don't undrstand why overall burden rate is the only factor in showing color. I feel like if the color was used to convey information and was clearly labeled, the color would be very effective. I did really appreciate the scales that were used. I felt like using the logarithmic scale allowed for a visual that was not extremely stretched out, and thus we could see the visual in the likes of New York, Los Angeles, and Miami. For this particular dataset, it was smart to use the continuous logarithmic scale. If there were two addition I would make to the graph, it would be to include labels to more known cities, such as Seattle, Dallas, Boston and Salt Lake City. This way, the graph may pop a little more and give more context to people living in other regions of the United States. I would also change the way I used the color, and clearly label my purpose of the color, which is to show a proportion. I believe that a darker color should be used to show a higher number of burdened households with overall burden rate, and lighter should be used for lower burden rates and households. This way, we can use the color system to show a "dangerous city" for how much that city has to pay in rent. 

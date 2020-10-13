@@ -1,0 +1,36 @@
+---
+title: "Week 4 Written HW"
+author: "Chris Moroney"
+date: "`r Sys.Date()`"
+output: openintro::lab_report
+---
+
+```{r load-packages, message=FALSE}
+library(tidyverse)
+library(openintro)
+library(babynames)
+```
+
+### WMD Chapter 4-5 Reflection
+
+Chapter 4 begins by continuing on the idea of education and how math can be a powerful force in causing schools to spend lots of money to improve their schools. The idea that schools use in increasing tuition is to target young students to pay for the school's budget for improvements all for the idea of creating "equality" among other students through education. This leads the idea that O'Neil expresses universities as "overpriced promises". The idea of advertising for universities helps benefit large companies like Facebook and Google, which O'Neil describes as a WMD for the advertising. Chapter 5 shifts the idea towards the justice system and criminals. O'Neil describes that there is potential for algorithms and math to be used in this system, but the existing algorithms had flaws in them. Predpol, which was a piece of software that predicted areas of more crime, had good intentions in trying to lower crime. However, the result was that the software targeted mostly poor neighborhoods, which ended up becoming an ethical problem between the police and the poor neighbors. O'Neil summarizes this by stating "the result is that we criminalize poverty, believing all the while that our tools are not only scientific but fair" (91). After reading these chapters, in response to Chapter 4, a question that I would ask O'Neil would be whether or not it was possible to find a way for public universities to lower their tution prices in a manner that does not reflect loss of power or status. Across many different universities and even just schools, there is the idea of "status" that usually results from paying money. I lived very close to a private high school, where base tuition was approximately $21,000 per year. To me, this is crazy to pay for just high school, but it reflects this idea of "smart students" because of the money that their parents are willing to pay. I'm wondering if this is a form of a WMD, in that "status" or the reflection of "status" through paying lots of money. 
+
+I really appreciate what O'Neil had to say about Chapter 5, about how software such as Predpol ended up "criminalizing poverty". I think that there are many "stereotypes" that are attributed today between race, status, and even political standing along with criminal records. Unfortunately, as much as I am, being a software person, it really makes my blood boil that people could believe stereotypes that are reinforced by software. Another example of this is how companies use Artificial Intelligence (AI) to automate the application process for positions. However, there was a major flaw in this software, in that the program was actually discriminating against people against color. While the intention of this program was completely unintended to discriminate, the problem is that the AI did discriminate, which becomes a major issue in further AI. I had the opportunity to work on AI for my company during my internship, and one of the biggest issues that we have to work with in AI is any ethical issues. What happened with Predpol is clearly an ethical issue, and I feel that it helped reinforce negative stereotypes against people in poorer neighborhoods, which I think is completely uncalled for. I believe that this example that O'Neil provides is something I can take with me to my work field, in that I must work primarily to satisfy customers, but also eliminate any ideas of stereotyping or discriminating. As software engineers, we must unite people together under God with technology, not push everyone away. What I believe O'Neil is saying is that sometimes, in some situations, while math and technology can make the better place, we must be extremely selective in how we apply our skills. Otherwise, there is a chance that we would be doing the world more harm instead of good. 
+
+### Exercise 2 from Handout on Data Wrangling
+
+1) We first want to include only the years in the 1990s, which includes years 1990 to 1999. We can use the filter function combined with the between function to only grab a subset of rows where the data falls in between these years. 
+2) We now want to group all of the remaining data organized by name. We would use the group by function to organize all data by name, and use the summarize function to display the total number of occurrences of each name. 
+3) We use the arrange function to arrange the order of our name populations (or name_pop). Within the arrange function we use the desc function to show the most populated names in the 1990s first, then in descending order. 
+4) Finish by using head(10) to show the 10 most commonly used names in the 1990s. 
+
+The most commonly used baby names in the 1990s are: Michael, Christopher, Matthew, Joshua, Jessica, Ashley, Jacob, Nicholas, Andrew, and Daniel. 
+```{r}
+babynames %>%
+  filter(between(year, 1990, 1999)) %>%
+  group_by(name) %>%
+  summarize(name_pop = sum(n)) %>% 
+  arrange(desc(name_pop)) %>%
+  head(10)
+```
+
