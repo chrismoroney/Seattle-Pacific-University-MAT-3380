@@ -1,0 +1,97 @@
+---
+title: "October 14 In-Class: More Data Wrangling"
+author: "Chris Moroney, Jordan Mielbrecht, Pauline Lee"
+date: "`r Sys.Date()`"
+output: openintro::lab_report
+---
+
+```{r load-packages, message=FALSE}
+library(tidyverse)
+library(openintro)
+library(Lahman)
+library(nycflights13)
+```
+
+### Exercise 1
+
+Insert any text here.
+
+```{r code-chunk-label}
+Batting %>%
+  group_by(playerID) %>%
+  summarize(careerHR = sum(HR), careerSB = sum(SB)) %>%
+  filter(careerHR >= 300 & careerSB >= 300) %>%
+  left_join(People, by=c("playerID" = "playerID")) %>%
+  select(nameFirst, nameLast, careerHR, careerSB, debut, finalGame)
+```
+
+### Exercise 2
+
+```{r}
+flights %>%
+  group_by(dest) %>%
+  summarize(N=n(), AverageDelay=mean(arr_delay, na.rm=TRUE)) %>%
+  arrange(desc(AverageDelay)) %>%
+  left_join(airports, by = c("dest" = "faa")) %>%
+  select(dest, N, AverageDelay, AirportName=name)
+  head(10)
+```
+
+### Exercise 3
+
+```{r}
+flights %>%
+  group_by(dest) %>%
+  summarize(N=n(), AverageDelay=mean(arr_delay, na.rm=TRUE)) %>%
+  arrange(desc(AverageDelay)) %>%
+  left_join(airports, by = c("dest" = "faa")) %>%
+  filter(N >= 730) %>%
+  select(dest, N, AverageDelay, AirportName=name)
+```
+
+### Exercise 4 
+
+The purpose of na.rm=TRUE is to remove all values with the value "NA" in the data so that it doesn't get calculated into the mean, or average. In R, if you take a numeric value, such as the value 6, and add it by NA, the result is NA. Thus, when calculating the mean, we see that any value in any name that has a single value of NA will cause the average delay to be NA. Thus, we must include na.rm to remove all NA values, and calculate the mean with only numeric values instead of inclusion of NA. 
+
+```{r}
+# Example: take a number and add by NA, result is NA
+6 + NA
+
+# Data list without na.rm=TRUE
+flights %>%
+  group_by(dest) %>%
+  summarize(N=n(), AverageDelay=mean(arr_delay)) %>%
+  arrange(desc(AverageDelay)) %>%
+  left_join(airports, by = c("dest" = "faa")) %>%
+  filter(N >= 730) %>%
+  select(dest, N, AverageDelay, AirportName=name)
+
+# Data list with na.rm=TRUE included
+flights %>%
+  group_by(dest) %>%
+  summarize(N=n(), AverageDelay=mean(arr_delay, na.rm=TRUE)) %>%
+  arrange(desc(AverageDelay)) %>%
+  left_join(airports, by = c("dest" = "faa")) %>%
+  filter(N >= 730) %>%
+  select(dest, N, AverageDelay, AirportName=name)
+```
+
+### Exercise 5
+
+There are 9430 NA values in the arr_delay variable within the flights dataset. This value makes up approximately 2.8% of the total flights data set. What we can observe from the flights with NA for arr_delay is that all of these flights have NA for air_time, and most of the flights have NA for arr_time. One possible explanation as to why all of the air_time would also be NA would be because the flight altogether was canceled. If the flight is canceled, then there isn't technically "0" air time because we would require air time in order to reach the destination. Since the flight is canceled, there is no data to show how much air time it took to reach the destination. If the arr_delay is NA along with air_time, then most likely the flight never came and was canceled. A canceled flight would also make sense for some of the arr_times to be NA because sometimes a flight can come to the airport, but still not take flight. Thus, the most likely situation for variables being NA is that the flights was canceled.
+```{r}
+na_flights <- flights %>%
+  filter(is.na(arr_delay))
+
+#set of flights with NA for arr_delay
+na_flights
+
+#num of flights in na_flights
+count(naflights)
+
+#calculating percentage of na_flights to flights
+count(na_flights) / count(flights) * 100
+```
+
+...
+

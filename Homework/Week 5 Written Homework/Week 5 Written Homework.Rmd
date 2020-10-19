@@ -1,0 +1,116 @@
+---
+title: "Week 5 Written Homework"
+author: "Chris Moroney"
+date: "`r Sys.Date()`"
+output: openintro::lab_report
+---
+
+```{r load-packages, message=FALSE}
+library(tidyverse)
+library(openintro)
+library(mdsr)
+library(Lahman)
+library(nycflights13)
+```
+
+
+### WMD Chapter 6 and 7 Reflection
+
+Chapter 6 is primarily about O'Neil telling stories of how software caused errors and mistakes in the hiring process for companies, which was Kronos and a British Hospital. O'Neil emphasizes that one of the most problematic aspects of using software for the hiring process in companies is that they don't provide good feedback from the feedback loop (page 112), and how the system ends up being more efficient instead of providing fairness to the hiring process (page 116). O'Neil finishes this chapter by mentioning how WMD's can be "pernicious" or harmful, but also can provide help and assistance, depending on our objective altogether. Chapter 7 is on a similar topic as Chpater 6 in software amongst companies, but rather has more of an emphasis on what software does inside of a company. Such examples of how software was used inside of companies was for rating staff performance. The results that came were often times very negative, which O'Neil also describes as "poisonous prejudices" against employees (page 123). If there was one question that I would ask O'Neil, it would be "do the companies have a certain expectation of the software when used in the companies?" Given that software is software, and often times used for automation, I was just wondering if there was too much of an expectation for software to provide both positive and negative feedback within companies. 
+
+I find it interesting that since Chapter 5, O'Neil has really hammered hard how software has really caused negative reforms in universities and companies. I feel like reading this really hits home for me because as I am studying computer science, I feel I am responsible for what has happened both before in companies and universities, as well as what will happen in the future. I feel some anxiety because I believe that O'Neil has plenty of evidence to show that software has had a very negative impact on universities and companies, particularly when evaluating the performance of these institutions. I'm not sure entirely what specific software was used, such as a particular model of if there was Machine Learning or AI used, but I truly believe that software is continually evolving and can prove O'Neil wrong in the long term. I imagine that some company will be able to come up with some AI model to improve the situations created in these universities and companies. However, even if there isn't "improvement", if I decide to work in this type of software or AI field, I need to make sure that the product that I develop does not result in causing more harm to these institutions. That is perhaps the worst contribution that one can deliver, and would only reinforce what O'Neil is saying about software in companies and universities. We cannot allow software to continue to be "poisonous prejudices" against students, employees, or managers in particular institutions, otherwise we may see software dying in today's world, which can cause a major economic collapse altogether. 
+
+### Exercise 4.1
+
+1) mean(variable)
+2) mutate(dataset, newvariable=variable1/variable2)
+3) arrange(desc(variable))
+4) filter(criteria)
+5) select(A, X)
+
+
+### Exercise 4.2
+
+The month with the most flights canceled proportionally is February at 0.0537 (5.37%), and the least flights canceled proportionally is October at 0.00938 (0.938%). In general, months in the fall (September, October, November) generally had the lowest canceled flights proportionally (4th lowest, 2nd lowest, and lowest). Winter months also tend to be more canceled, such as that in February and December being the highest and third highest ratio being canceled. 
+
+```{r}
+flights %>%
+  group_by(month) %>%
+  summarize(cancelled_flight_ratios=sum(is.na(arr_delay))/sum(n())) %>%
+  arrange(desc(cancelled_flight_ratios))
+```
+
+### Exercise 4.8
+
+```{r}
+Teams <- mutate(Teams, 
+                BA = H / AB, 
+                SLG = ((H-(X2B+X3B+HR)) + (2*X2B) + (3*X3B) + (4*HR))/(AB))
+```
+
+### Exercise 4.9
+
+In general, in more recent years, it looks like the American League has a slightly higher SLG percentage than in the NL. However before around 1980-1990, it seems like the leagues were more even in terms of SLG percentage. One possible reason for the difference in SLG percentage is because in the AL, pitchers exclusively pitch, whereas in the NL, pitchers have to pitch and hit in the same game. The extra hitter in the AL is known as a Designated Hitter (DH), and this player only bats. Pitchers are typically not very strong hitters, which means that pitchers are much less likely to gain bases by hitting. Thus, the difference in lineups between the AL teams and NL teams may favor the AL teams because the NL teams have a batter that is a pitcher, whereas the AL teams have a hitting specialist, which is more likely to earn bases. 
+
+```{r}
+since1954 <- Teams %>%
+  filter(yearID >= 1954)
+
+ggplot(data=since1954, mapping=aes(x=yearID, y=SLG))+
+  geom_jitter() +
+  geom_smooth(se = FALSE) + 
+  facet_wrap(~ lgID)
+```
+
+### Exercise 4.10
+
+These are the top 15 teams since 1969 with the highest SLG percentages.
+```{r}
+Teams %>%
+  filter(yearID >= 1969) %>%
+  arrange(desc(SLG)) %>%
+  select(yearID, name, SLG) %>%
+  head(15)
+
+```
+
+### Exercise 4.14
+
+Walter Johnson, Greg Maddux, Roger Clemens, Steve Carlton, Nolan Ryan, Don Sutton, Phil Niekro, Gaylord Perry, Tom Seaver, and Randy Johnson all have at least 300 career wins and 3000 career strikeouts. 
+```{r}
+Pitching %>%
+  group_by(playerID) %>%
+  summarize(careerWins = sum(W), careerSO = sum(SO)) %>%
+  filter(careerWins >= 300 & careerSO >= 3000) %>%
+  left_join(People, by = c("playerID" = "playerID")) %>%
+  select(nameFirst, nameLast, careerWins, careerSO) %>%
+  arrange(desc(careerWins, careerSO))
+```
+
+### Exercise 4.15
+
+Out of all the players to have hit 50 Home Runs in a season in MLB history, Pete Alonso (New York Mets) had the lowest batting average at 0.259.
+```{r}
+Batting %>%
+  mutate(Batting, 
+         BA = H / AB) %>%
+  filter(HR >= 50) %>%
+  left_join(People, by = c("playerID" = "playerID")) %>%
+  select(nameFirst, nameLast, yearID, HR, BA) %>%
+  arrange(BA)
+```
+
+### Exercise 4.17
+
+In general, what I observe is that zip codes with a higher median score usually have a larger number of inspections than zip codes with lower median scores. However, this is not a very accurate generalization as I can observe this pattern in a very general sense. Nearer to the bottom of the list (lower median score), more zip codes have around 500 or so inspections, whereas at the top of the list, there are usually thousands of inspections, but this pattern is not consistent throughout the entire data set. Generally speaking, however, I can observe that a higher median score generally means that there were more inspections in general. 
+```{r}
+Violations %>%
+  filter(!is.na(score)) %>%
+  group_by(zipcode) %>%
+  summarize(median_score = median(score), num_inspections = sum(n())) %>%
+  filter(num_inspections >= 50) %>%
+  select(zipcode, median_score, num_inspections) %>%
+  arrange(desc(median_score))
+```
+
+
