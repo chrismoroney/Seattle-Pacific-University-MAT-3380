@@ -1,0 +1,72 @@
+---
+title: "Final Project"
+author: "Chris Moroney"
+date: "`r Sys.Date()`"
+output: openintro::lab_report
+---
+
+```{r load-packages, message=FALSE}
+#https://data.cdc.gov/api/views/9mfq-cb36/rows.csv
+library(tidyverse)
+library(openintro)
+library(readr)
+library(plotly)
+library(shiny)
+library(albersusa)
+us_COVID19_Data <- read_csv("United_States_COVID-19_Cases_and_Deaths_by_State_over_Time.csv", 
+                            col_types = cols(submission_date = col_date(format = "%m/%d/%Y")))
+my_map_theme <- function(){
+  theme(panel.background=element_blank(),
+        axis.text=element_blank(),
+        axis.ticks=element_blank(),
+        axis.title=element_blank())
+}
+```
+
+### Exercise 1
+
+```{r code-chunk-label}
+states <- usa_sf("laea")
+
+covid19_data <- left_join(states, us_COVID19_Data, by=c("iso_3166_2" = "state")) 
+#%>%filter(submission_date == "11/09/2020")
+
+#ggplot(covid19_data) + 
+#  geom_sf(aes(fill=new_case), size=0.25) + 
+#  scale_fill_continuous(low="yellow", high="red") +
+#  my_map_theme()
+```
+
+```{r}
+covid_by_day <- function(var="new_case", date="10/31/2020"){
+  var1 <- enquo(var)
+  input_data <- covid19_data %>% 
+    filter(submission_date==date) %>%
+    select(name, iso_3166_2, my_stat =!!var1, submission_date, geometry) %>%
+    mutate(text = paste(var, ": ", my_stat))
+  p <- ggplot(input_data) +
+    geom_sf(aes(fill=my_stat, text=text), size=0.25) +
+    scale_fill_continuous(low="yellow", high="red") +
+    my_map_theme()
+  ggplotly(p, tooltip = "text")
+}
+covid_plot(covid_by_day("new_death"))
+#covid_by_day(tot_cases, "10/31/2020")
+#covid_by_day(new_case, "10/31/2020")
+#covid_by_day(new_death, "10/31/2020")
+
+covid_plot <- function(input_data){
+  p <- ggplot(input_data) +
+    geom_sf(aes(fill=my_stat, text=text), size=0.25) +
+    scale_fill_continuous(low="yellow", high="red", breaks=c(min(var))) +
+    my_map_theme()
+  ggplotly(p, tooltip = "text")
+}
+#covid_plot(covid_by_day())
+
+#covid_plot(covid_by_day("11/09/2020"))
+#covid_plot(covid_by_day("tot_cases", "04/05/2020"))
+
+
+```
+
