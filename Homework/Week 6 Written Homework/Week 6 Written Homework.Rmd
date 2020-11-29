@@ -1,0 +1,135 @@
+---
+title: "Week 6 Written Homework"
+author: "Chris Moroney"
+date: "`r Sys.Date()`"
+output: openintro::lab_report
+---
+
+```{r load-packages, message=FALSE}
+library(tidyverse)
+library(openintro)
+library(tidyr)
+```
+
+### WMD Chapter 8-9 Reflection
+	Chapter 8 describes how O’Neil sees the idea of financial status for both companies and individuals, and how certain algorithms, such as the FICO score, are potentially misleading. The biggest problem with these calculations is that it categorizes people based off of their financial status, which thus causes discrimination. O’Neil describes this as a “veritable blizzard of proxies” (145). O’Neil finishes this chapter by witnessing how e-scores have led to false assumptions on people’s financial portfolios, and asking the readers who the “winners” and “losers” are of this situation. Chapter 9 continues to follow the idea of finance by looking at analytics. One example that O’Neil uses is how car insurance businesses focus on a person’s financial portfolio and their residential areas, opposed to that person’s driving records (168-169). O’Neil claims that while finances to a degree are important, they shouldn’t be the discriminating factor for particular rates for a person or not. If there is one question that I would want to ask O’Neil, it is if whether or not this type of discrimination against people based on financial portfolios can be considered criminal. If it is, then is it possible that algorithms around us will change considering a person can be “criminalized” for “discriminating against a poor / rich person”? What would this outcome look like to O’Neil? I think it could be fairly interesting to see how algorithms would consider criminal records against people’s financial portfolios in order to determine “success”. 
+	
+	I truly, truly believe that this book is opening my eyes a little bit more. I am really understanding and seeing how much money means to the eyes of people. I think that the phrase “people are inherently evil” can potentially be true when looking in the eyes of money. But is it really the human’s fault? Or is it the algorithm’s fault because of what information is passed on to humans? I honestly think it is both. An algorithm should be written for the good and benefits of other people, or to help solve potential problems in society. An algorithm is simply just an equation that can solve an issue. However, it seems like algorithms generate more and more issues ethically, or at least it seems like so in this WMD book. It is frightening to me to think that algorithms can do more harm in the world. Is this perhaps why God created a world without “technology”? Is technology evil therefore in the eyes of a Christian? Reading these chapters (as well as the rest of the book) really makes me wonder how, as a Computer Scientist, can bring people together in Christ through software and technology. I’m not really getting much confidence in finding this answer while reading this book. I certainly hope that O’Neil sees good in math, technology, software and the likes, because more than anything, I really think she has a strong opinion that this technology is doing harm to our world. And sadly, after listening to her writing, and in the eyes of a Christian, she potentially could be correct. 
+
+### Handout code
+
+```{r code-chunk-label}
+who1 <- who %>%
+  pivot_longer(
+    cols = new_sp_m014:newrel_f65,
+    names_to = "groups",
+    values_to = "cases",
+    values_drop_na = TRUE)
+who1
+
+who2 <- who1%>% separate(groups,c("new", "type", "sexage"), sep="_")
+
+table(who2$new)
+table(who2$type)
+table(who2$sexage)
+table(who1$groups)
+
+who2 <- who1%>% mutate(groups =str_replace(groups, "newrel", "new_rel"))
+who3 <- who2%>% separate(groups,c("new", "type", "sexage"), sep="_")
+
+table(who3$new)
+table(who3$type)
+table(who3$sexage)
+
+who4 <- who3 %>%
+  select(-new,-iso2) %>%
+  separate(sexage,c("sex", "age"), sep = 1)
+who4
+
+who_tidy <- who %>%
+  pivot_longer(cols = new_sp_m014:newrel_f65, 
+               names_to = "groups", 
+               values_to = "cases") %>%
+  mutate(groups =str_replace(groups, "newrel", "new_rel")) %>%
+  separate(groups,c("new", "type", "sexage"), sep="_") %>%
+  select(-new,-iso2) %>%
+  separate(sexage,c("sex", "age"), sep = 1)
+
+nrow(who4);nrow(who_tidy)
+```
+
+### Exercise 1
+
+The top 5 countries with the most new cases of Tuberculosis (TB) are China, India, South Africa, Indonesia, and Bangladesh. However, if we look closely in the who4 dataset, we can see that as time progresses from the first cases of TB in that country to the latest cases (around 2013), the total number of cases tends to increase over time. The number of cases in almost every country are much larger from the earliest year compared with the latest year. Even though the 5 countries listed have the most total cases from the earliest time period to the latest time period per country, the entire total number of cases does not tell accurtely which countries have the largest problems with TB. China and India are countries with high populations and even higher population densities, which means naturally, these countries are more prone to catching the disease. However, a more accurate measure to determine a country's status against TB is to measure the rate of the population that is being infected, or how the rate changes over time. Given that China and India have such large the physical number of cases is very high, but the number of cases the next year does not change much comparatively to other countries. Thus, a more accurate way to determine which countries have larger problems with TB is to measure which countries have higher infection rates by year, instead of just finding the largest number of TB cases. 
+
+```{r}
+who4 %>%
+  select(country, cases) %>%
+  group_by(country) %>%
+  summarize(total_cases = sum(cases)) %>%
+  arrange(desc(total_cases)) %>%
+  head(5)
+```
+
+### Exercise 2
+
+Given that there are multiple rows of the same country for population, one possible solution to resolving this issue is to find the average population across the time period provided in the data set. The "year" column contains values between 1995 and 2013, which means we can take the average population of each country over this 18 year period, and the largest average population can be represented as the largest population in the world. The only issue with this would be if there were any outliers in the dataset. Some causes that could drastically raise or decrease the population  but this is highly unlikely because 18 years is not a substantial amount of time in terms of society and history, so I would not expect5 the data to change extremely drastically for any country. This list is pretty similar to the list in exercise 1 in that the list sorts the largest values to be at the top of the list, then descends in order according to the value in the changed column. The lists differ however because exercise 1's list computes the total number of cases altogether of TB, whereas the list in exercise 2 computes the average of all of the values for a country. 
+
+```{r}
+population %>%
+  select(country, population) %>%
+  group_by(country) %>%
+  summarize(avg_population = mean(population)) %>%
+  arrange(desc(avg_population)) %>%
+  head(10)
+```
+
+
+### Exercise 3
+
+The countries with the highest TB rates in 2013 were South Africa, Swaziland, Lesotho, Namibia, Kiribati, Democratic People's Republic of Korea, Botswana, Zambia, Marshall Islands, and Zimbabwe.
+```{r}
+# Highest overall rates, measures overall rate of increase from 1995 to 2013
+who4 %>%
+  left_join(population, by=c("country" = "country", "year" = "year")) %>%
+  group_by(country) %>%
+  # for OVERALL annual rate, take the total cases of all years and divide by average population. I used median
+  # to stay consistent with population and rule out any outlier population values. 
+  summarize(annual_rate = sum(cases, na.rm=TRUE)/median(population, na.rm=TRUE), 
+            rate_percent = annual_rate * 100) %>%
+  arrange(desc(rate_percent)) %>%
+  head(10)
+
+# Highest rates in 2013 
+who4 %>%
+  left_join(population, by=c("country" = "country", "year" = "year")) %>%
+  filter(year == 2013) %>%
+  group_by(country) %>%
+  summarize(rate_2013 = sum(cases, na.rm=TRUE)/median(population, na.rm=TRUE), 
+            rate_percent_2013 = rate_2013 * 100) %>%
+  arrange(desc(rate_percent_2013)) %>%
+  head(10)
+  
+```
+
+### Exercise 4
+
+The countries and year with the highest annual rate is Swaziland in 2010, South Africa in 2009, Samoa in 2009, South Africa in 2010, Swaziland in 2006, South Africa in 2008, South Africa in 2013, Lesotho in 2009, South Africa in 2007, and South Africa in 2012. 
+```{r}
+who4 %>%
+  left_join(population, by=c("country" = "country", "year" = "year")) %>%
+  # group year and country together
+  group_by(country, year) %>%
+  summarize(annual_rate_for_year = sum(cases, na.rm=TRUE)/median(population, na.rm=TRUE), 
+            rate_percent = annual_rate_for_year * 100) %>%
+  arrange(desc(rate_percent)) %>%
+  head(10)
+
+```
+
+
+### Exercise 5
+
+The most apparent pattern that I see is that countries with higher Tuberculosis rates are typically found in Southern Africa, whereas countries with lower Tuberculosis rates are typically found in Europe or Pacific Island areas. This is very interesting because the apparent trend suggests that rates are based off of continential region, which does raise many potential causes for why certain countries have the highest rates while others don't. Of course, there is the idea of cases compared to the population because some countries have the most cases world-wide, but relative to their population is only a certain amount. However, some potential causes for why Tuberculosis may be most apparent in Southern African countries is the economy, climate, and health care availability. What I do notice is that the rates do seem to be lower in most countries that have a really solid health care system. Perhaps lack of economy or health care availability is the reason why the rate has continually increased for countries in the Southern African region. 
+
+

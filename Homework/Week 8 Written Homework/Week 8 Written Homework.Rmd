@@ -1,0 +1,164 @@
+---
+title: "Week 8 Written Homework"
+author: "Chris Moroney"
+date: "`r Sys.Date()`"
+output: openintro::lab_report
+---
+
+### WMD Chapter 10 and Ending
+
+Chapter 10 focuses on politics and how math and algorithms play a role in the political system. O’Neil talked about Obama and Romney during their presidential race, and even showcased some strategies that both teams used in order to gain an advantage from statistics that would help them progress in their campaign. One such example with Obama was how “The Obama re-election campaign [was] growing the analytics team to work on high-impact large-scale data mining problems” (188). This was so Data Scientist, Rayid Ghani, could help target like-minded audiences for Obama to deliver an impactful message in terms of politics. This was the idea that math and data had on politics. The ending of the book is best summarized by O’Neil stating why she believes math and algorithms should be regulated in all fields, both on federal, public levels, as well as private. Given all the reasons from the previous chapters, and the fact that algorithms and math continue to grow on colossal scales that compete against one another, O’Neil believes that these algorithms need to be dialed back and that math isn’t the center of all aspects of life. Even in the purest sense, such as education, there were drawbacks that caused WMD’s to play a negative role in society. Based on the conclusion and all the previous chapters, something I would ask O’Neil is if she believes that algorithms should be reduced by enforcing law? I think that this may be the only way to prevent companies and people from overabusing math in their favor. If it isn’t, or if the only punishment is money, then companies and large institutions will not be afraid to continue using algorithms to extend their power. Currently, it feels like knowledge of math and data combined with algorithms is a new form of currency for institutions. 
+
+This book was definitely not what I expected when I first thought about this book. This book was definitely a journey for me and changed my thinking about math and technology in the world today. I continually ask myself whenever I reference this book, “Is this the world that God intended to create for us?” Did God foresee in this book that technology would come, thus producing more sin even if there is glory in his name? Is O’Neil possibly making an argument to go back in time to where algorithms were not destroying our world more and more and creating more and more competition? I recently was watching a Christian show, called The Chosen. This is a story primarily about the Gospel and how each of Jesus’s followers (including the 12 disciples, Mary Magdalene etc) witnessed Jesus and his miracles, as well as listened to all he had to say. I was fascinated by this show because of how satisfied people were with the world around them simply just by having Jesus, or their religion in their lives. As a matter of fact, one of the characters, Matthew, continually felt judged and unsatisfied with his life because he was brilliant and smart as a tax collector, but wasn’t supposed to follow in his Jewish ways. He had, at the time, the most complex system of currency around him that he was running. But he was unsatisfied. Perhaps what O’Neil is suggesting in her book is that algorithms leading to success is not necessarily the most successful path for humanity. Perhaps what is most important to humans is following our morals, not just making money or using technology. Maybe life is a lot more than just creating profits or success from algorithms and technology, but perhaps is collaboration with other people and following our morals. Regardless, in conclusion, I believe that O’Neil is arguing that while people have many different ways of life, perhaps sticking with just algorithms and math in real-world scenarios is more destructive than it is productive. This applies to many different scales of people or peoples. 
+
+
+```{r load-packages, message=FALSE}
+library(tidyverse)
+library(openintro)
+library(albersusa)
+burden <- read_csv("RentCostBurden.csv")
+my_map_theme <-function(){
+  theme(panel.background=element_blank(),
+        axis.text=element_blank(),
+        axis.ticks=element_blank(),
+        axis.title=element_blank())
+}
+
+# Code from beginning of hand out
+us_county <- counties_sf("laea")
+
+burden_county <- burden %>%
+  filter(Type=="County") %>%
+  select(Location, Overall_Burden_Rate_18) %>%
+  separate(Location,c("county", "state"), sep=", ")
+
+us_county_burden <- left_join(us_county, burden_county,
+                              by=c("name"="county","iso_3166_2"="state"))
+```
+
+### Exercise 1
+
+```{r code-chunk-label}
+us_county <- counties_sf("laea")
+
+WA_county_burden <- us_county_burden %>%
+  filter(state_fips == 53)
+
+us_county_burden <- left_join(us_county, burden_county,
+                              by=c("name"="county","iso_3166_2"="state"))
+
+ggplot(WA_county_burden) + 
+  geom_sf(aes(fill=Overall_Burden_Rate_18), size=0.25) +
+  scale_fill_continuous(low="yellow", high="red") +
+  my_map_theme()
+
+```
+
+### Exercise 2
+
+```{r}
+us_county <- counties_sf()
+
+us_county_burden <- left_join(us_county, burden_county,
+                              by=c("name"="county","iso_3166_2"="state"))
+
+WA_county_burden <- us_county_burden %>%
+  filter(state_fips == 53)
+
+ggplot(WA_county_burden) + 
+  geom_sf(aes(fill=Overall_Burden_Rate_18), size=0.25) +
+  scale_fill_continuous(low="yellow", high="red") +
+  my_map_theme()
+```
+
+### Exercise 3
+
+```{r}
+us_county <- counties_sf()
+
+median_county <- burden %>%
+  filter(Type=="County") %>%
+  select(Location, Median_Rent_18) %>%
+  separate(Location,c("county", "state"), sep=", ")
+
+us_county_median <- left_join(us_county, median_county,
+                              by=c("name"="county","iso_3166_2"="state"))
+
+WA_county_median <- us_county_median %>%
+  filter(state_fips == 53)
+
+ggplot(WA_county_median) + 
+  geom_sf(aes(fill=Median_Rent_18), size=0.25) +
+  scale_fill_continuous(low="yellow", high="red") +
+  my_map_theme()
+```
+
+### Exercise 4
+
+```{r}
+# My code from exercise 4
+us_county <- counties_sf()
+
+us_county_burden <- left_join(us_county, burden_county,
+                              by=c("name"="county","iso_3166_2"="state"))
+
+NW_county_burden <- us_county_burden %>%
+  filter(state_fips == 53 | state_fips == 16 | state_fips == 41)
+
+ggplot(NW_county_burden) + 
+  geom_sf(aes(fill=Overall_Burden_Rate_18), size=0.25) +
+  scale_fill_continuous(low="yellow", high="red") +
+  my_map_theme()
+
+# Code added from after exercise 4
+NW_states <- usa_sf() %>%
+  filter(name%in%c("Washington", "Oregon", "Idaho"))
+ggplot(NW_county_burden) +
+  geom_sf(aes(fill=Overall_Burden_Rate_18), size=0.25) +
+  geom_sf(data = NW_states, alpha=0, size=0.5, color="black") +
+  scale_fill_continuous(low="yellow", high="red") +
+  my_map_theme()
+```
+
+### Exercise 5
+
+```{r}
+us_county <- counties_sf("laea")
+
+burden_county <- burden %>%
+  filter(Type=="County") %>%
+  select(Location, Overall_Burden_Rate_18) %>%
+  separate(Location,c("county", "state"), sep=", ")
+
+us_county_burden <-left_join(us_county, burden_county,
+                             by=c("name"="county","iso_3166_2"="state"))
+
+ggplot(us_county_burden) +
+  geom_sf(aes(fill=Overall_Burden_Rate_18), size=0.25) +
+  geom_sf(data = usa_sf(), alpha=0, size=0.5, color="black") +
+  scale_fill_continuous(low="yellow", high="red") +
+  my_map_theme()
+```
+
+### Exercise 6
+
+The "counties" that have data but are improperly matched are Alexandria, Richmond, DC, St. Louis, Suffolk, Virginia Beach, Fairfax, Bedford, Lynchburg, Portsmouth, Chesapeake, Norfolk, Baltimore, Hampton, Newport News, and Roanoke.
+
+The reasons why these locations have rent data but are improperly matched is because these locations were identified as "counties" in the burden dataset. When burden_county was made from burden, the locations were still known as counties. However, when we joined this dataset with the us_county dataset, we see that the locations that were seen as "counties" in the burden and burden_county sets were actually either counties AND cities in the us_county set, or just cities. Thus, the information that is shared in the join puts the rent burden stats into both the city and county name in the us_county_burden set, or simply puts the rent burden into the city name. A possible reason for this is that many of the "cities" that categorize in this issue is from Virginia. This could possibly mean that cities and counties can be associated as the same place (though I'm not 100% sure on this). In the case of the other cities not in Virginia, as well as D.C., this simply could be because that these locations are not entirely counties, but are areas that are known as cities as well. D.C. is unique because it isn't really a city or a county, and thus is why its classification is blank. It's more of an "area" so to speak, and thus since there is still data, the data still is transferred over to the dataset. 
+```{r}
+# These are the "counties" that have data but are mismatched
+have_data <- us_county_burden %>%
+  filter(!is.na(Overall_Burden_Rate_18)) %>%
+  filter(lsad != "County")
+
+
+new_us_county_burden <- us_county_burden %>%
+  filter(lsad != "City" || name != "District of Columbia")
+
+ggplot(new_us_county_burden) +
+  geom_sf(aes(fill=Overall_Burden_Rate_18), size=0.25) +
+  geom_sf(data = usa_sf(), alpha=0, size=0.5, color="black") +
+  scale_fill_continuous(low="yellow", high="red") +
+  my_map_theme()
+```
+

@@ -1,0 +1,120 @@
+---
+title: "Quiz 2"
+author: "Chris Moroney"
+date: "`r Sys.Date()`"
+output: openintro::lab_report
+---
+
+```{r load-packages, message=FALSE}
+library(tidyverse)
+library(openintro)
+revenue <-read_csv("https://bit.ly/385faPm")
+```
+
+### Question 1 a
+
+```{r code-chunk-label}
+revenue %>%
+  pivot_longer(c(Qtr_1, Qtr_2, Qtr_3, Qtr_4), names_to="Quarter", values_to="Revenue")
+```
+
+### Question 1 b
+
+```{r}
+revenue %>%
+  pivot_longer(c(Qtr_1, Qtr_2, Qtr_3, Qtr_4), names_to="Quarter", values_to="Revenue") %>%
+  group_by(Group, Year) %>%
+  summarize(annual_revenue = sum(Revenue)) %>%
+  arrange(Year, desc(annual_revenue))
+```
+
+### Question 1 c
+
+```{r}
+# Used this to reproduce required dataframe
+revenue2 <- revenue %>%
+  rename('1'=Qtr_1, '2'=Qtr_2, '3'=Qtr_3, '4'=Qtr_4) %>%
+  pivot_longer('1':'4', names_to="Column", values_to="Revenue") %>%
+  unite(Year_Quarter, Year, Column) %>%
+  arrange(Year_Quarter)
+revenue2
+
+# Using this as assurance
+revenue2 <-read_csv("https://bit.ly/3jQK00e")
+```
+
+### Question 1 d
+
+```{r}
+library(zoo)
+revenue2 <-mutate(revenue2, Year_Quarter=as.yearqtr(Year_Quarter))
+```
+
+### Question 1 e
+
+```{r}
+ggplot(data=revenue2, mapping=aes(x=Year_Quarter, y=Revenue)) +
+  geom_line(mapping=aes(color=Group)) +
+  scale_x_yearqtr(format = "%Y-Q%q") + 
+  xlab("Year-Quarter") +
+  ylab("Revenue (millions of $)")
+```
+
+### Question 2 a
+
+```{r}
+library(nycflights13)
+NYCdestinations <- nycflights %>%
+  filter(year==2013) %>%
+  group_by(year) %>%
+  summarize(total_flights = n(), mean_arrival = mean(arr_delay), mean_dist = mean(distance))
+```
+
+### Question 2 b
+
+The 5 destinations with the given conditions are Nashville Intl, Chicago Midway Intl, Harsfield Jackson Atlanta Intl, Washington Dulles Intl, and Cleveland Hopkins Intl
+```{r}
+nycflights %>%
+  filter(year==2013) %>%
+  group_by(dest) %>%
+  summarize(total_flights = n(), mean_arr = mean(arr_delay)) %>%
+  filter(total_flights >= 365) %>%
+  left_join(airports, by=c('dest' = 'faa')) %>%
+  select(dest, name, total_flights, mean_arr) %>%
+  arrange(desc(mean_arr)) %>%
+  head(5)
+```
+
+### Question 2 c
+
+```{r}
+graphdata <- nycflights %>%
+  filter(year==2013) %>%
+  group_by(dest) %>%
+  summarize(total_flights = n(), mean_arrival_delay = mean(arr_delay), mean_distance = mean(distance)) %>%
+  filter(total_flights >= 365)
+
+ggplot(data=graphdata, mapping=aes(x=mean_distance,y=mean_arrival_delay)) +
+  geom_point(alpha=1/3) +
+  geom_smooth(se=FALSE)
+```
+
+### Question 2 d
+
+The outlier airport is BNA, which is the Nashville Intl airport (information from the airports dataframe)
+```{r}
+newgraphdata <- nycflights %>%
+  filter(year==2013) %>%
+  group_by(dest) %>%
+  summarize(total_flights = n(), mean_arrival_delay = mean(arr_delay), mean_distance = mean(distance)) %>%
+  filter(total_flights >= 365) %>%
+  filter(mean_arrival_delay < 15)
+
+ggplot(data=newgraphdata, mapping=aes(x=mean_distance,y=mean_arrival_delay)) +
+  geom_point(alpha=1/3) +
+  geom_smooth(se=FALSE)
+```
+
+### Question 2 e
+
+What I am noticing in general between both graphs is that as the mean distance increases, the mean arrival delay will decrease. However, between around 200 and 500 miles, the arrival delay actually increases slightly from 8 minutes to 10 minutes, but then for distances greater than 500 miles, the mean arrival time decreases significantly from about 10 minutes to just under 2 minutes. A possible explanation for this is that for flights that have to travel longer distances, there could a greater chance of hazardous weather that could disrupt the flight. This means that the flight would have to follow a more strict time frame in order to avoid the hazardous weather, which could include leaving sooner than anticipated times. For shorter flights, the time frame may not always be as strict, which means that the time frame of arriving could vary more since careful planning of other hazards may not be necessary. There could be other possibilities such as shorter flights being more likely to be canceled or changed than longer flights, which means that flights may arrive at later times. 

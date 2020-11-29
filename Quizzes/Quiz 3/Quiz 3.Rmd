@@ -1,0 +1,122 @@
+---
+title: "Quiz 3"
+author: "Chris Moroney"
+date: "`r Sys.Date()`"
+output: openintro::lab_report
+---
+
+```{r load-packages, message=FALSE}
+library(tidyverse)
+library(openintro)
+library(readxl)
+library(readr)
+library(plotly)
+library("rnaturalearth")
+library("rnaturalearthdata")
+WHOLifeExpectancy <- read_excel("WHOLifeExpectancy.xlsx")
+WHO_metadata <- read_csv("WHO_metadata.csv", col_names = FALSE) 
+my_map_theme <- function(){
+  theme(panel.background=element_blank(),
+        axis.text=element_blank(),
+        axis.ticks=element_blank(),
+        axis.title=element_blank())
+}
+```
+
+### Question 1
+
+```{r code-chunk-label}
+WHOLifeExpectancy <- WHOLifeExpectancy %>%
+  rename(
+    "country" = "...1",
+    "HALEbirth_Both sexes_2016" = "Healthy life expectancy (HALE) at birth (years)",
+    "HALEbirth_Both sexes_2015" = "...3",
+    "HALEbirth_Both sexes_2010" = "...4",
+    "HALEbirth_Both sexes_2005" = "...5",
+    "HALEbirth_Both sexes_2000" = "...6",
+    "HALEbirth_Male_2016" = "...7",
+    "HALEbirth_Male_2015" = "...8",
+    "HALEbirth_Male_2010" = "...9",
+    "HALEbirth_Male_2005" = "...10",
+    "HALEbirth_Male_2000" = "...11",
+    "HALEbirth_Female_2016" = "...12",
+    "HALEbirth_Female_2015" = "...13",
+    "HALEbirth_Female_2010" = "...14",
+    "HALEbirth_Female_2005" = "...15",
+    "HALEbirth_Female_2000" = "...16",
+    "HALE60_Both sexes_2016" = "Healthy life expectancy (HALE) at age 60 (years)",
+    "HALE60_Both sexes_2015" = "...18",
+    "HALE60_Both sexes_2010" = "...19",
+    "HALE60_Both sexes_2005" = "...20",
+    "HALE60_Both sexes_2000" = "...21",
+    "HALE60_Male_2016" = "...22",
+    "HALE60_Male_2015" = "...23",
+    "HALE60_Male_2010" = "...24",
+    "HALE60_Male_2005" = "...25",
+    "HALE60_Male_2000" = "...26",
+    "HALE60_Female_2016" = "...27",
+    "HALE60_Female_2015" = "...28",
+    "HALE60_Female_2010" = "...29",
+    "HALE60_Female_2005" = "...30",
+    "HALE60_Female_2000" = "...31",
+  ) %>%
+  filter(!is.na(country))
+WHOLifeExpectancy
+```
+
+### Question 2
+
+```{r}
+WHOLifeExpectancy <- WHOLifeExpectancy %>%
+  pivot_longer("HALEbirth_Both sexes_2016":"HALE60_Female_2000", names_to="Column", values_to="value") %>%
+  separate(Column, into=c("HALE_type", "sex", "year"), sep="_") %>%
+  pivot_wider(names_from="HALE_type", values_from="value") %>%
+  arrange(desc(year))
+WHOLifeExpectancy
+```
+
+### Question 3
+
+```{r}
+WHO_metadata <- WHO_metadata%>%
+  rename(
+    "iso3" = "X2",
+    "country" = "X3",
+  )
+
+world <- ne_countries(scale = "medium", returnclass = "sf")
+
+WHOLifeExpectancy2016 <- WHOLifeExpectancy %>%
+  filter(year==2016, sex=="Both sexes")
+WHOLifeExpectancy2016
+
+WHOLifeExpectancy2016 <- left_join(WHOLifeExpectancy2016, WHO_metadata, by=c("country" = "country"))
+
+sf_object <- left_join(world, WHOLifeExpectancy2016, by=c("adm0_a3" = "iso3"))
+sf_object
+```
+
+### Question 4
+
+```{r}
+ggplot(sf_object) +
+  geom_sf(aes(fill=as.numeric(HALEbirth))) +
+  scale_fill_continuous(low="red", high="blue", breaks=c(45, 55, 65, 75)) + 
+  labs(fill = "Healthy Life Expectancy at Birth (years)") +
+  my_map_theme()
+```
+
+### Question 5
+
+```{r}
+sf_object <- sf_object %>%
+  mutate(text = paste("Healthy Life Expectancy at Birth: ", HALEbirth, " years"))
+p <- ggplot(sf_object) +
+  geom_sf(aes(fill=as.numeric(HALEbirth), text=text)) +
+  scale_fill_continuous(low="red", high="blue", breaks=c(45, 55, 65, 75)) + 
+  labs(fill = "Healthy Life Expectancy at Birth (years)") +
+  my_map_theme()
+
+ggplotly(p, tooltip="text")
+```
+

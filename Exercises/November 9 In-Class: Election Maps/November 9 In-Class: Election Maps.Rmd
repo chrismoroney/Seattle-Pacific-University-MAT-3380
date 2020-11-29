@@ -1,0 +1,128 @@
+---
+title: "November 9 In-Class: Election Maps"
+author: "Chris Moroney, Jordan Mielbrecht, Pauline Lee"
+date: "`r Sys.Date()`"
+output: openintro::lab_report
+---
+
+```{r load-packages, message=FALSE}
+library(tidyverse)
+library(openintro)
+library(albersusa)
+elections <- read_csv("elections.csv")
+election_county <- read_csv("election_county.csv")
+my_map_theme <-function(){
+  theme(panel.background=element_blank(),
+        axis.text=element_blank(),
+        axis.ticks=element_blank(),
+        axis.title=element_blank())
+}
+```
+
+### Exercise 1
+
+```{r code-chunk-label}
+us_states <- usa_sf("laea")
+
+new_cutpoints <-c(-40,-30,-20,-10,0,10,20,30,40)
+
+election_d_points <- elections %>%
+  select(state, d_points, d_points_2012) %>%
+  rename('2016'= d_points,'2012'= d_points_2012) %>%
+  pivot_longer(c('2016', '2012'), names_to="Year", values_to="d_points")
+  
+election_graph_stuff <- left_join(us_states, election_d_points, by=c("name"="state")) %>%
+  mutate(margin = cut(d_points, breaks = new_cutpoints))
+
+my_colors <-c("#b2182b","#d6604d","#f4a582","#fddbc7","#d1e5f0","#92c5de","#4393c3","#2166ac")
+
+ggplot(election_graph_stuff) +
+  geom_sf(aes(fill=margin)) +
+  my_map_theme() + 
+  scale_fill_manual("Voting Percentage Margin by State", values = my_colors) +
+  facet_wrap(~Year, nrow=1)
+```
+
+### Exercise 2a
+
+```{r}
+us_county <- counties_sf("laea")
+us_county <- mutate(us_county, fips2 = as.numeric(as.character(fips)))
+states <- usa_sf("laea")
+
+new_cutpoints <-c(-1, -0.75, -0.5, -0.25, 0, 0.25, 0.5, 0.75, 1)
+
+election_county_margin <- election_county %>%
+  select(fips, per_dem_2016, per_gop_2016) %>%
+  mutate(per_diff_2016 = per_dem_2016 - per_gop_2016)
+
+election_graph_stuff <- left_join(us_county, election_county_margin, by=c("fips2"="fips")) %>%
+  mutate(margin = cut(per_diff_2016, breaks = new_cutpoints))
+
+my_colors <-c("#b2182b","#d6604d","#f4a582","#fddbc7","#d1e5f0","#92c5de","#4393c3","#2166ac")
+
+ggplot(election_graph_stuff) +
+  geom_sf(aes(fill=margin)) +
+  geom_sf(data = states, alpha=0, size=0.7, color="black")+
+  my_map_theme() + 
+  scale_fill_manual("margin of victory", values = my_colors) 
+```
+
+### Exercise 2b
+
+```{r}
+us_county <- counties_sf("laea")
+us_county <- mutate(us_county, fips2 = as.numeric(as.character(fips)))
+state_WA<- usa_sf("laea") %>%
+  filter(name=="Washington")
+
+new_cutpoints <-c(-1.25, -1, -0.75, -0.5, -0.25, 0, 0.25, 0.5, 0.75, 1, 1.25)
+
+WA_county <- election_county %>%
+  filter(state=="WA") %>%
+  select(fips, per_dem_2016, per_gop_2016) %>%
+  mutate(per_diff_2016 = per_dem_2016 - per_gop_2016)
+
+WA_election_graph_stuff <- left_join(us_county, WA_county, by=c("fips2" = "fips")) %>%
+  mutate(margin = cut(per_diff_2016, breaks = new_cutpoints)) %>%
+  filter(state=="Washington")
+
+my_colors <-c("#b2182b","#d6604d","#f4a582","#fddbc7","#d1e5f0","#92c5de","#4393c3","#2166ac")
+
+ggplot(WA_election_graph_stuff) +
+  geom_sf(aes(fill=margin)) +
+  geom_sf(data = state_WA, alpha=0, size=0.7, color="black")+
+  my_map_theme() + 
+  scale_fill_manual("margin of victory", values = my_colors)
+```
+
+### Exercise 2c
+
+```{r}
+us_county <- counties_sf("laea")
+us_county <- mutate(us_county, fips2 = as.numeric(as.character(fips)))
+states <- usa_sf("laea") 
+
+western_states <- left_join(states, elections, by=c("name"="state")) %>%
+  filter(census.y=="West")
+
+new_cutpoints <-c(-1.25, -1, -0.75, -0.5, -0.25, 0, 0.25, 0.5, 0.75, 1, 1.25)
+
+western_county <- election_county %>%
+  filter(census_region=="West") %>%
+  select(fips, per_dem_2016, per_gop_2016, census_region) %>%
+  mutate(per_diff_2016 = per_dem_2016 - per_gop_2016) 
+
+west_election_graph_stuff <- left_join(us_county, western_county, by=c("fips2"="fips")) %>%
+  mutate(margin = cut(per_diff_2016, breaks = new_cutpoints)) %>%
+  filter(census_region=="West")
+
+my_colors <-c("#b2182b","#d6604d","#f4a582","#fddbc7","#d1e5f0","#92c5de","#4393c3","#2166ac")
+
+ggplot(west_election_graph_stuff) +
+  geom_sf(aes(fill=margin)) +
+  geom_sf(data = western_states, alpha=0, size=0.7, color="black")+
+  my_map_theme() + 
+  scale_fill_manual("margin of victory", values = my_colors)
+```
+

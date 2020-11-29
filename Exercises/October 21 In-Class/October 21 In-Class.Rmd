@@ -1,0 +1,98 @@
+---
+title: "October 21 In-Class"
+author: "Chris Moroney, Pauline Lee, Jordan Mielbrecht"
+date: "`r Sys.Date()`"
+output: openintro::lab_report
+---
+
+```{r load-packages, message=FALSE}
+library(tidyverse)
+library(openintro)
+library(readr)
+exercise3 <- read_csv("exercise3.csv")
+trial <- read_csv("trial.csv")
+scores <- read_csv("scores.csv")
+```
+
+### Exercise 1
+
+```{r code-chunk-label}
+trial %>%
+  pivot_wider(names_from="Treatment", values_from="Result") %>%
+  mutate (
+    diff = Treat - Control
+  )
+```
+
+### Exercise 2
+
+```{r}
+scores %>%
+  pivot_longer(c("Winter", "Spring", "Fall"), names_to="Quarter") %>%
+  pivot_wider(names_from="Test", values_from="value") %>%
+  mutate (
+    Total = Math + Writing
+  )
+```
+
+### Exercise 3
+
+```{r}
+# Convert table
+convert <- exercise3 %>%
+  pivot_wider(names_from="sex", values_from=c("meanL", "sdL", "meanR", "sdR")) %>%
+  select(grp, meanL_F, sdL_F, meanR_F, sdR_F, meanL_M, sdL_M, meanR_M, sdR_M)
+convert
+
+# Convert back
+convert %>%
+  pivot_longer(meanL_F:sdR_M, names_to="Column", values_to="value") %>%
+  separate(Column, into = c("math", "sex"), sep="_") %>%
+  pivot_wider(names_from="math", values_from="value")
+```
+
+### Exercise 4
+
+a) The dataframe produced by at the end of Exercise 1 is better than the dataframe produced by "all" in this section because we can see what we are comparing the Result with to produce the values in the Diff column. The problem with what we are seeing in this final dataframe is that we don't know what we are comparing the Result to, so Diff essentially is an assumed value that may, or may not be a control group. Regardless, the context is not clear in this final dataframe because we cannot determine what actually creates the values in Diff. 
+
+b) An issue with not sorting the Diff column is that we may create assumptions of the data that may be incorrect. Even though our Results may be the highest for one particular piece of data, the difference of what the value is supposed to be matters most. One example is if we are finding the dimensions of a particular field to build a fence around, we want to make sure that our data is as accurate as possible, thus minimizing our Diff. If our Diff isn't sorted, we may not know what priority a particular dimension has that we need to fix. The diff can be more important than the result sometimes. 
+
+c) An issue with having a value that is missing for one of the subjects is that we have no value to compare the treatment to the control, which also means that our calculation for Diff would be NA. The problem with this is that we cannot tell if a subject would need any adjustments or changes, simply because we have nothing to compare to. Imagine if we are building a fence in a field, and one of the dimensions is unknown. We would not know if we needed to increase or decrease the length of this fence because we don't know the dimension itself. Knowing all the values is important so that we can actually calculate some sort of difference. 
+```{r}
+# Part a
+
+ds1 <- data.frame(ID=c(1,2,3,1,2,3),
+        Treatment=c("T","T","T","C","C","C"),
+        Result=c(11,15,17,13,10,13))
+ds1
+
+Treat <- filter(ds1, Treatment=="T")
+Control <- filter(ds1, Treatment=="C")
+all <- mutate(Treat, Diff = Treat$Result-Control$Result)
+all
+
+# Part b
+
+ds2 <- data.frame(ID=c(1,2,3,1,2,3),
+        Treatment=c("T","T","T","C","C","C"),
+        Result=c(11,15,13,17,10,13))
+ds2
+
+Treat <- filter(ds2, Treatment=="T")
+Control <- filter(ds2, Treatment=="C")
+all <- mutate(Treat, Diff = Treat$Result-Control$Result)
+all
+
+# Part c
+
+ds3 <- data.frame(ID=c(1,2,3,1,2,3),
+        Treatment=c("T","T","T","C","C","C"),
+        Result=c(11,15,17,13,NA,13))
+ds3
+
+Treat <- filter(ds3, Treatment=="T")
+Control <- filter(ds3, Treatment=="C")
+all <- mutate(Treat, Diff = Treat$Result-Control$Result)
+all
+```
+
